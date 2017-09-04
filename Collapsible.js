@@ -14,6 +14,7 @@ export default class Collapsible extends Component {
     easing: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
     style: ViewPropTypes.style,
     children: PropTypes.node,
+    measureContent: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -22,6 +23,7 @@ export default class Collapsible extends Component {
     collapsedHeight: 0,
     duration: 300,
     easing: 'easeOutCubic',
+    measureContent: false,
   };
 
   constructor(props) {
@@ -43,6 +45,9 @@ export default class Collapsible extends Component {
       nextProps.collapsedHeight !== this.props.collapsedHeight
     ) {
       this.state.height.setValue(nextProps.collapsedHeight);
+    }
+    if (nextProps.measureContent !== this.props.measureContent) {
+      this._contentHeightChanged();
     }
   }
 
@@ -149,6 +154,16 @@ export default class Collapsible extends Component {
     this.setState({ contentHeight });
   };
 
+  _contentHeightChanged = contentHeight => {
+    this.contentHandle.getNode().measure((x, y, width, height) => {
+      this.state.height.setValue(contentHeight);
+      this.setState({
+        measuring: false,
+        measured: true,
+        contentHeight: height,
+      });
+    });
+  };
   render() {
     const { collapsed } = this.props;
     const { height, contentHeight, measuring, measured } = this.state;
